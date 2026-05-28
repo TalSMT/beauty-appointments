@@ -1,6 +1,7 @@
 package com.example.beautyappointments.controller;
 
 
+import com.example.beautyappointments.entity.Appointment;
 import com.example.beautyappointments.entity.Customer;
 import com.example.beautyappointments.repository.CustomerRepository;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,6 +34,8 @@ public class CustomerController {
     public List<Customer> getAll() {
         return repository.findAll();
     }
+
+
 
 
 }
