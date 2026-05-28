@@ -11,8 +11,16 @@ public class Appointment {
     private String treatmentName;
     private  double price;
 
+    @ManyToOne
+    private Customer customer;
 
+    public Customer getCustomer() {
+        return customer;
+    }
 
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
     public String getDateTime() {
         return dateTime;
     }
