@@ -1,69 +1,57 @@
 package com.example.beautyappointments.controller;
 
 import com.example.beautyappointments.entity.Appointment;
+import com.example.beautyappointments.service.AppointmentService;
+import org.springframework.stereotype.Service;
+
 import com.example.beautyappointments.entity.Customer;
 import com.example.beautyappointments.repository.AppointmentRepository;
 import com.example.beautyappointments.repository.CustomerRepository;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/appointments")
 public class AppointmentController {
 
-    private final AppointmentRepository repository;
-    private final CustomerRepository customerRepository;
+    private final AppointmentService service;
 
-    public AppointmentController(AppointmentRepository repository, CustomerRepository customerRepository) {
-        this.repository = repository;
-        this.customerRepository = customerRepository;
+
+    public AppointmentController(AppointmentService service) {
+        this.service = service;
+
     }
 
     // GET - מחזיר את כל התורים
     @GetMapping
     public List<Appointment> getAllAppointments() {
-        return repository.findAll();
+
+        return service.getAll();
+    }
+    //מחזיר סכום הפריטים עבור התור
+    @GetMapping("/customer/{id}/total")
+    public Double getTotalPrice(@PathVariable Long id){
+        return service.getTotalPriceByCustomer(id);
     }
 
 
 
     // POST - מוסיף תור חדש
     @PostMapping
-    public Appointment addAppointment(@RequestBody Appointment appointment) {
-
-        Long customerId = appointment.getCustomer().getId();
-        Customer customer = customerRepository.findById(customerId).orElseThrow();
-         appointment.setCustomer(customer);
-        return repository.save(appointment);
+    public Appointment Create(@RequestBody Appointment appointment) {
+        return service.create(appointment);
     }
-    @GetMapping("/customer/{id}")
-    public List<Appointment> getByCustomer(@PathVariable Long id){
-        return repository.findByCustomerId(id);
+    @GetMapping("/{id}")
+    public Appointment getById(@PathVariable Long id){
+        return service.getById(id);
     }
-    @GetMapping("/customer/{id}/total")
-    public Double getTotalPrice(@PathVariable Long id) {
 
-        List<Appointment> appointments =
-                repository.findByCustomerId(id);
-
-        return appointments.stream()
-                .mapToDouble(Appointment::getPrice)
-                .sum();
-    }
     @DeleteMapping ("/{id}")
     public  void deleteAppointment(@PathVariable Long id){
-        if (!repository.existsById(id)){
-            throw new RuntimeException("Appointment not found");
-        }
-        repository.deleteById(id);
+      service.delete(id);
     }
     @PutMapping("/{id}")
-    public Appointment updateAppointment(@PathVariable Long id, @RequestBody Appointment updatedAppointment){
-        Appointment existing = repository.findById(id).orElseThrow(()->new RuntimeException("not found"));
-        existing.setTreatmentName(updatedAppointment.getTreatmentName());
-        existing.setPrice(updatedAppointment.getPrice());
-        existing.setDateTime(updatedAppointment.getDateTime());
-        return repository.save(existing);
+    public Appointment updateAppointment(@PathVariable Long id, @RequestBody Appointment appointment){
+        return service.update(id,appointment);
     }
 }
