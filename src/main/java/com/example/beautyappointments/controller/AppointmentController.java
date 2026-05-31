@@ -32,8 +32,6 @@ public class AppointmentController {
     @PostMapping
     public Appointment addAppointment(@RequestBody Appointment appointment) {
 
-        System.out.println(appointment);
-
         Long customerId = appointment.getCustomer().getId();
         Customer customer = customerRepository.findById(customerId).orElseThrow();
          appointment.setCustomer(customer);
@@ -42,5 +40,30 @@ public class AppointmentController {
     @GetMapping("/customer/{id}")
     public List<Appointment> getByCustomer(@PathVariable Long id){
         return repository.findByCustomerId(id);
+    }
+    @GetMapping("/customer/{id}/total")
+    public Double getTotalPrice(@PathVariable Long id) {
+
+        List<Appointment> appointments =
+                repository.findByCustomerId(id);
+
+        return appointments.stream()
+                .mapToDouble(Appointment::getPrice)
+                .sum();
+    }
+    @DeleteMapping ("/{id}")
+    public  void deleteAppointment(@PathVariable Long id){
+        if (!repository.existsById(id)){
+            throw new RuntimeException("Appointment not found");
+        }
+        repository.deleteById(id);
+    }
+    @PutMapping("/{id}")
+    public Appointment updateAppointment(@PathVariable Long id, @RequestBody Appointment updatedAppointment){
+        Appointment existing = repository.findById(id).orElseThrow(()->new RuntimeException("not found"));
+        existing.setTreatmentName(updatedAppointment.getTreatmentName());
+        existing.setPrice(updatedAppointment.getPrice());
+        existing.setDateTime(updatedAppointment.getDateTime());
+        return repository.save(existing);
     }
 }
