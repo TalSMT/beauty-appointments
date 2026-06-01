@@ -7,7 +7,7 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Long id;
-    private String dateTime;
+    private LocalDateTime dateTime;
     private String treatmentName;
     private  double price;
 
@@ -21,11 +21,11 @@ public class Appointment {
     public void setCustomer(Customer customer) {
         this.customer = customer;
     }
-    public String getDateTime() {
+    public LocalDateTime getDateTime() {
         return dateTime;
     }
 
-    public void setDateTime(String dateTime) {
+    public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
