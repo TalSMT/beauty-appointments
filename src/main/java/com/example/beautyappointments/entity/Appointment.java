@@ -1,60 +1,23 @@
 package com.example.beautyappointments.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import com.example.beautyappointments.entity.Treatment;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Long id;
     private LocalDateTime dateTime;
-    private String treatmentName;
-    private  double price;
-
+    @ManyToOne
+    @JoinColumn(name = "treatment_id")
+    private Treatment treatment;
     @ManyToOne
     private Customer customer;
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-
-
-
-    public double getPrice() {
-        return price;
-    }
-
-    public void setPrice(double price) {
-        this.price = price;
-    }
-
-    public String getTreatmentName() {
-        return treatmentName;
-    }
-
-    public void setTreatmentName(String treatmentName) {
-        this.treatmentName = treatmentName;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-
+    @Enumerated(EnumType.STRING)
+    private AppointmentStatus status;
 }
