@@ -60,14 +60,19 @@ public class AppointmentService {
     // בדיקת כפל תורים
 
     private void validNoOverlap(LocalDateTime start, LocalDateTime end){
+
         List<Appointment> existing = appointmentRepository.findByDateTimeBetween(start.toLocalDate().atStartOfDay(),start.toLocalDate().atTime(23,59));
         boolean overlap = existing.stream().anyMatch(a-> {
+            if (a.getTreatment() == null){
+                throw new RuntimeException("NuLL TREATMENT in appointment id ="+a.getId());
+            }
             LocalDateTime aStart = a.getDateTime();
             LocalDateTime aEnd = aStart.plusMinutes(a.getTreatment().getDurationMinutes());
             return start.isBefore(aEnd) && aStart.isBefore(end); });
             if(overlap){
                 throw new ResponseStatusException(HttpStatus.CONFLICT,"Time slot already taken");
             }
+
         }
 
 
@@ -75,8 +80,9 @@ public class AppointmentService {
     private AppointmentDTO toDto(Appointment appointment){
         AppointmentDTO dto = new AppointmentDTO();
         dto.setId(appointment.getId());
-       dto.setTreatmentId(appointment.getTreatment().getId());
-
+        if(appointment.getTreatment()!= null) {
+            dto.setTreatmentId(appointment.getTreatment().getId());
+        }
         dto.setDateTime(appointment.getDateTime());
 
         if(appointment.getCustomer() != null){
@@ -124,18 +130,18 @@ public class AppointmentService {
         Customer customer = customerRepository.findById(dto.getCustomerId()).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,"Customer not found"));
         Treatment treatment = treatmentRepository.getReferenceById(dto.getTreatmentId());
-        System.out.println("STEP 1 - treatment loaded");
-        System.out.println("treatment id :" +treatment.getId());
-        System.out.println("treatment price :" +treatment.getPrice());
+      /*  System.out.println("STEP 1 - treatment loaded");
+
+        System.out.println("treatment price :" +treatment.getPrice());*/
 
         appointment.setCustomer(customer);
         appointment.setTreatment(treatment);
         appointment.setStatus(AppointmentStatus.SCHEDULED);
 
-        System.out.println("STEP 2 :before save" );
+       /* System.out.println("STEP 2 :before save" );
         System.out.println("appointment treatment class :" +appointment.getTreatment().getClass());
-        System.out.println("appointment treatment id :" +appointment.getTreatment().getId());
-        System.out.println("appointment customer id :" +appointment.getCustomer().getId());
+
+        System.out.println("appointment customer id :" +appointment.getCustomer().getId());*/
 
         LocalDateTime start = appointment.getDateTime();
         LocalDateTime end = start.plusMinutes(treatment.getDurationMinutes());
@@ -144,14 +150,14 @@ public class AppointmentService {
         validNoOverlap (start,end);
 
 
-        System.out.println("STEP 3 :saving appointment" );
+        /*System.out.println("STEP 3 :saving appointment" );
         System.out.println("Treatment object class=" +appointment.getTreatment().getClass());
-        System.out.println("Treatment id =" +appointment.getTreatment().getId());
-        System.out.println("is new?=" +(appointment.getTreatment().getId()==null));
+
+        System.out.println("is new?=" +(appointment.getTreatment().getId()==null));*/
 
         Appointment saved = appointmentRepository.save(appointment);
 
-        System.out.println("STEP 4 :saved OK, id=" +saved.getId());
+        //System.out.println("STEP 4 :saved OK, id=" +saved.getId());
 
         return toDto(saved);
     }
